@@ -1,21 +1,34 @@
-## Linux Automation: Backup & Restore Scripts
+# Linux Automation: Backup & Restore Scripts
 
 ---
 
+
+A structured portfolio of Shell Scripts (Bash) designed for system administration, health monitoring, automated backups, and task scheduling in Linux environments.
+
+## Project Overview
+
+This repository contains modular automation scripts built to streamline routine System Administrator & DevOps tasks:
+
+* **Module 1:** Automated Backup, Compression, Integrity Verification, and Restore Engine.
+* **Module 2:** Real-Time System Health Monitoring, Threshold Alerting, Service Inspection, and Logging.
+
 ## Features & Workflow
 
-This repository contains two main shell scripts located in `scripts/`:
+### Module 1: Automated Backup & Integrity Engine
+  * **Script:** `scripts/sys_backup.sh` & `scripts/sys_restore.sh`
+  * **Key Features:**
+  * Creates compressed `.tar.gz` archives of specified source directories.
+  * Generates SHA-256 checksums to guarantee data integrity.
+  * Automates verification during restore procedures.
+  * Prevents accidental data corruption during system recovery.
 
-1. **`backup.sh`**
-   * Compresses target directories into a `.tar.gz` archive.
-   * Automatically generates a `.sha256` checksum file to log the integrity hash of the backup.
-   * Stores the generated files inside `~/backup`.
-
-2. **`restore.sh`**
-   * Ask the user for the target backup file name.
-   * **Integrity Check:** Verifies the SHA-256 checksum before extracting any files.
-   * If the hash matches (`OK`), it extracts the archive to `~/restored`.
-   * If the hash fails or the file is corrupted/missing, it triggers a safety exit and cancels the extraction.
+### Module 2: System Health Monitoring & Alerting
+  * **Script:** `scripts/sys_monitor.sh`
+  * **Key Features:**
+  * **Disk & RAM Monitoring:** Parses system metrics using `df`, `free`, `awk`, and `tr` pipelines.
+  * **Threshold Alerts:** Issues `[WARNING]` logs whenever Disk usage exceeds 80% or RAM exceeds 85%.
+  * **Service Health Check:** Verifies active states of critical background services (e.g., `cron`, `ssh`) using `pgrep`.
+  * **Dual Logging (`tee -a`):** Outputs status directly to stdout while appending timestamped entries to `~/logs/sys_health.log`.
 
 ---
 
@@ -64,9 +77,13 @@ chmod +x scripts/backup.sh scripts/restore.sh
 ```bash
 crontab -e
 ```
-   you can edit by using nano (recommended)
-   then, add this in the bottom of your crontab:
+   you can edit by using nano (recommended).
+   then, add this in the bottom of your crontab (automation backup everyday at 00:00):
 ```bash
-0 0 * * * * /home/kingjav/Desktop/linux-automation/scripts/backup.sh
+0 0 * * * /home/$USER/Desktop/linux-automation/scripts/backup.sh
+```
+   and add this in the bottom of your crontab (for automation monitor & logs every hour):
+```bash
+0 * * * * /home/$USER/Desktop/linux-automation/scripts/sysmon.sh
 ```
    cntrl o > enter > cntrl x

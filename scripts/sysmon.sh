@@ -16,6 +16,15 @@ log_message() {
    echo "[$TIMESTAMP] $1" | tee -a "$LOG_FILE"
 }
 
+check_service() {
+   SERVICE_NAME=$1
+   if pgrep "$SERVICE_NAME" > /dev/null 2>&1; then
+      log_message "[OK] Service '$SERVICE_NAME' aktif"
+   else
+      log_message "[OK] Service '$SERVICE_NAME' tidak aktif"
+fi
+}
+
 log_message "=== SYSTEM HEALTH CHECK ==="
 log_message "Disk Usage : $DISK_USAGE%"
 log_message "RAM Usage : $RAM_USAGE%"
@@ -32,5 +41,9 @@ if [ "$RAM_USAGE" -gt "$RAM_HOLD" ]; then
 else
     log_message "[OK] Kapasitas RAM Masih Aman"
 fi
+
+log_message "-----CHECKING SERVICES-----"
+check_service "cron"
+check_service "ssh"
 
 log_message "---------------------------"
