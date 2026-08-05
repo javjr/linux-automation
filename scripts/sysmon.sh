@@ -6,6 +6,16 @@ TIMESTAMP=$(date +"%Y-%m-%d %H-%M-%S")
 
 mkdir -p  "$LOG_DIR"
 
+BOT_TOKEN="8505344675:AAFjRFIfWobKYMguy6aJf161qkkBopudii4"
+ID="7977612732"
+
+send_telegram() {
+   local message="$1"
+   curl -s -X POST "https://api.telegram.org/bot${BOT_TOKEN}/sendMessage" \
+      -d "chat_id=${ID}" \
+      -d "text=${message}" >/dev/null 2>&1
+}
+
 DISK_HOLD=80
 RAM_HOLD=85
 
@@ -17,11 +27,13 @@ log_message() {
 }
 
 check_service() {
-   SERVICE_NAME=$1
+   local SERVICE_NAME="$1"
    if pgrep "$SERVICE_NAME" > /dev/null 2>&1; then
       log_message "[OK] Service '$SERVICE_NAME' aktif"
    else
-      log_message "[OK] Service '$SERVICE_NAME' tidak aktif"
+      local msg="[CRITICAL] Service '$SERVICE_NAME' tidak aktif"
+      log_message "$msg"
+      send_telegram "$msg"
 fi
 }
 
@@ -30,20 +42,24 @@ log_message "Disk Usage : $DISK_USAGE%"
 log_message "RAM Usage : $RAM_USAGE%"
 
 if [ "$DISK_USAGE" -gt "$DISK_HOLD" ]; then
-    log_message "[WARNING] Kapasitas Disk Kritis! Terpakai: $DISK_USAGE%"
+    msg="[WARNING] Kapasitas Disk Kritis! Terpakai: $DISK_USAGE%"
+    log_message "$msg"
+    send_telegram "$msg"
 else
     log_message "[OK] Kapasitas Disk Masih Aman"
 fi
 
 
 if [ "$RAM_USAGE" -gt "$RAM_HOLD" ]; then
-    log_message "[WARNING] Kapasitas RAM Kritis! Terpakai: $RAM_USAGE%"
+    msg="[WARNING] Kapasitas RAM Kritis! Terpakai: $RAM_USAGE%"
+    log_message "$msg"
+    send_telegram "$msg"
 else
     log_message "[OK] Kapasitas RAM Masih Aman"
 fi
 
-log_message "-----CHECKING SERVICES-----"
-check_service "cron"
-check_service "ssh"
-
+log_message "-----CHECKING SERVICE-----"
+for service in cron ssh; do
+    check_service "$service"
+done
 log_message "---------------------------"
