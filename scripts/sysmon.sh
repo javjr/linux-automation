@@ -1,13 +1,18 @@
 #!/bin/bash
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -f "$SCRIPT_DIR/config.env" ]; then
+    source "$SCRIPT_DIR/config.env"
+else
+    echo "Error: File config.env is not Found"
+    exit 1
+fi
+
 LOG_DIR="$HOME/logs"
 LOG_FILE="$LOG_DIR/sys_hp.log"
 TIMESTAMP=$(date +"%Y-%m-%d %H-%M-%S")
 
 mkdir -p  "$LOG_DIR"
-
-BOT_TOKEN="8505344675:AAFjRFIfWobKYMguy6aJf161qkkBopudii4"
-ID="7977612732"
 
 send_telegram() {
    local message="$1"
